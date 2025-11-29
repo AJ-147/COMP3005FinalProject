@@ -23,17 +23,17 @@ public class PersonalTrainingSession {
 //    @JoinColumn(name="trainer_id", nullable=false)
 //    private Trainer trainer;
 //
-//    @ManyToOne
-//    @JoinColumn(name = "room_id", nullable = false)
-//    private Room room;
+    @ManyToOne
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
 
     public PersonalTrainingSession() {}
 
-    public PersonalTrainingSession(LocalDateTime sessionTime, Member member){//, Trainer trainer, Room room) {
+    public PersonalTrainingSession(LocalDateTime sessionTime, Member member, Room room){//, Trainer trainer) {
         this.sessionTime = sessionTime;
         this.member = member;
         //this.trainer = trainer;
-        //this.room = room;
+        this.room = room;
         this.status= "BOOKED";
     }
 

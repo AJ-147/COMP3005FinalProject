@@ -23,6 +23,8 @@ public class ClassRegistration {
     @JoinColumn(name="group_class_id", nullable = false)
     private GroupFitnessClass groupFitnessClass;
 
+
+
     public ClassRegistration() {}
 
     public ClassRegistration(Member member, GroupFitnessClass groupFitnessClass) {
@@ -53,6 +55,10 @@ public class ClassRegistration {
 
     public void setGroupFitnessClass(GroupFitnessClass groupFitnessClass) {
         this.groupFitnessClass = groupFitnessClass;
+    }
+
+    public void setRegistrationDate(LocalDateTime registeredAt) {
+        this.registeredAt = registeredAt;
     }
 
     @Override

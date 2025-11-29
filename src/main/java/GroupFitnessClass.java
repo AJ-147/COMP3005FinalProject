@@ -24,21 +24,21 @@ public class GroupFitnessClass {
 //    @JoinColumn(name="trainer_id", nullable=false)
 //    private Trainer trainer;
 //
-//    @ManyToOne
-//    @JoinColumn(name="room_id", nullable=false)
-//    private Room room;
+    @ManyToOne
+    @JoinColumn(name="room_id", nullable=false)
+    private Room room;
 
-    @OneToMany(mappedBy = "groupClass", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "groupFitnessClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClassRegistration> registrations = new ArrayList<>();
 
     public GroupFitnessClass() {}
 
-    public GroupFitnessClass(String className, LocalDateTime classTime, int capacity) {//Trainer trainer, Room room) {}
+    public GroupFitnessClass(String className, LocalDateTime classTime, int capacity,Room room) {//Trainer trainer
     this.className = className;
     this.classTime = classTime;
     this.capacity = capacity;
-    //this.trainer= trainer;
-        // this.room = room;
+    this.room = room;
+        //this.trainer= trainer;
     }
 
     public Long getId() {
@@ -77,19 +77,18 @@ public class GroupFitnessClass {
 //        this.trainer = trainer;
 //    }
 //
-//    public Room getRoom() {
-//        return room;
-//    }
-//
-//    public void setRoom(Room room) {
-//        this.room = room;
-//    }
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
 
     public List<ClassRegistration> getRegistrations() {
         return registrations;
     }
 
-    // Add a registration to this class
     public void addRegistration(ClassRegistration registration) {
         registration.setGroupFitnessClass(this);
         registrations.add(registration);

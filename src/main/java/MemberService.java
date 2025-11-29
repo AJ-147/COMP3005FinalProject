@@ -4,6 +4,9 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 
 public class MemberService {
@@ -69,11 +72,12 @@ public class MemberService {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
+        member = session.merge(member);
+
         FitnessGoal goal = new FitnessGoal(goalDescription, targetValue, member);
         member.getFitnessGoals().add(goal);
 
         session.persist(goal);
-        session.merge(member);
 
         tx.commit();
         session.close();
@@ -85,11 +89,12 @@ public class MemberService {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
+        member = session.merge(member);
+
         HealthMetric metric = new HealthMetric(height, weight, heartRate, member);
         member.getHealthMetrics().add(metric);
 
         session.persist(metric);
-        session.merge(member);
 
         tx.commit();
         session.close();
@@ -97,6 +102,71 @@ public class MemberService {
         System.out.println("Health metric recorded!");
     }
 
+
+    public Member loadMemberWithHealthHistory(Long memberId) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        Member member = session.createQuery(
+                        "SELECT m FROM Member m LEFT JOIN FETCH m.healthMetrics WHERE m.id = :id",
+                        Member.class
+                )
+                .setParameter("id", memberId)
+                .uniqueResult();
+
+        session.close();
+        return member;
+    }
+
+    public boolean registerForClass(String email, int classId){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+
+        try{
+            tx =  session.beginTransaction();
+
+            Member member = session.createQuery(
+                    "FROM Member WHERE email = :email", Member.class)
+                    .setParameter("email", email)
+                    .uniqueResult();
+            if(member == null){
+                System.out.println("Member not found!");
+                return false;
+            }
+
+            GroupFitnessClass gfc = session.get(GroupFitnessClass.class, classId);
+
+            if(gfc == null){
+                System.out.println("Class not found!");
+                return false;
+            }
+
+            int currentRegistered = gfc.getRegistrations().size();
+            if (currentRegistered >= gfc.getCapacity()){
+                System.out.println("Class is at max capacity!");
+                return false;
+            }
+
+            ClassRegistration reg = new ClassRegistration();
+            reg.setMember(member);
+            reg.setGroupFitnessClass(gfc);
+            reg.setRegistrationDate(LocalDateTime.now());
+
+            session.persist(reg);
+
+            gfc.getRegistrations().add(reg);
+
+            tx.commit();
+            return true;
+        } catch(Exception ex){
+            if(tx != null){
+                tx.rollback();
+            }
+            ex.printStackTrace();
+            return false;
+        } finally{
+            session.close();
+        }
+    }
 
 
 }
