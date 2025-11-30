@@ -11,7 +11,6 @@ public class ClassRegistration {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Column(name="registered_at", nullable = false)
     private LocalDateTime registeredAt;
 
@@ -22,7 +21,6 @@ public class ClassRegistration {
     @ManyToOne
     @JoinColumn(name="group_class_id", nullable = false)
     private GroupFitnessClass groupFitnessClass;
-
 
 
     public ClassRegistration() {}

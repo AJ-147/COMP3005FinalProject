@@ -32,6 +32,10 @@ public class DataInitializer {
             session.persist(r4);
         }
 
+        //create trainers??
+
+
+
         session.getTransaction().commit();
         session.close();
     }

@@ -10,7 +10,8 @@
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
         <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/FinalProject</property>
         <property name="hibernate.connection.username">postgres</property>
-        <property name="hibernate.connection.password">test</property>
+        <property name="hibernate.connection.password">test</property>   <!-- zack password  -->
+        <!-- <property name="hibernate.connection.password">7w4x2u7C</property>   <!- alex password  -->
 
         <!-- Hibernate Settings -->
         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
@@ -25,7 +26,15 @@
         <mapping class="GroupFitnessClass"/>
         <mapping class="ClassRegistration"/>
         <mapping class="AdminStaff"/>
+        <mapping class="AdminService"/>
         <mapping class="Room"/>
+        <mapping class="Trainer"/>
+        <mapping class="TrainerAvailability"/>
+        <mapping class="TrainerService"/>
+        <mapping class="DataInitializer"/>
+        <mapping class="HibernateUtil"/>
+        <mapping class="Main"/>
+        <mapping class="MemberService"/>
 
     </session-factory>
 </hibernate-configuration>

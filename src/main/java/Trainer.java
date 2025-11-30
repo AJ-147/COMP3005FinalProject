@@ -16,15 +16,17 @@ public class Trainer {
     @Column(nullable = false, unique = true)
     private String email;
 
+    //trainer availability
+    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TrainerAvailability> availabilitySlots = new ArrayList<>();
+
     //one trainer can teach many classes
     @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ClassRegistration> classRegistrations = new ArrayList<>();
+    private List<GroupFitnessClass> groupFitnessClass = new ArrayList<>();
 
     //one trainer can teach many personal training sessions
     @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PersonalTrainingSession> personalTrainingSessions = new ArrayList<>();
-
-
 
 
     public Trainer() {}
@@ -42,8 +44,25 @@ public class Trainer {
     public String getEmail() {return email;}
     public void setEmail(String email) {this.email = email;}
 
+    public List<TrainerAvailability> getAvailabilitySlots() {return availabilitySlots;}
 
+    public List<GroupFitnessClass> getGroupFitnessClass() {return groupFitnessClass;}
 
+    public List<PersonalTrainingSession> getPersonalTrainingSessions() {return personalTrainingSessions;}
 
+    public void addAvailabilitySlot(TrainerAvailability slot) {
+        slot.setTrainer(this);
+        availabilitySlots.add(slot);
+    }
+
+    public void addGroupFitnessClass(GroupFitnessClass fitnessClass) {
+        fitnessClass.setTrainer(this);
+        groupFitnessClass.add(fitnessClass);
+    }
+
+    public void  addPTSessions(PersonalTrainingSession PTsession) {
+        PTsession.setTrainer(this);
+        this.personalTrainingSessions.add(PTsession);
+    }
 
 }

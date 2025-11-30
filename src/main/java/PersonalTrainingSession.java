@@ -18,11 +18,10 @@ public class PersonalTrainingSession {
     @JoinColumn(name="member_id", nullable=false)
     private Member member;
 
-    //FOR NOW THESE ARE COMMENTED OUT TILL IMPLEMENTED
-//    @ManyToOne
-//    @JoinColumn(name="trainer_id", nullable=false)
-//    private Trainer trainer;
-//
+    @ManyToOne
+    @JoinColumn(name="trainer_id", nullable=false)
+    private Trainer trainer;
+
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
@@ -65,14 +64,14 @@ public class PersonalTrainingSession {
         this.member = member;
     }
 
-//    public Trainer getTrainer() {
-//        return trainer;
-//    }
-//
-//    public void setTrainer(Trainer trainer) {
-//        this.trainer = trainer;
-//    }
-//
+    public Trainer getTrainer() {
+        return trainer;
+    }
+
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
+    }
+
 //    public Room getRoom() {
 //        return room;
 //    }

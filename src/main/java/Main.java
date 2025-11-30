@@ -9,11 +9,13 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         MemberService memberService = new MemberService();
         AdminService adminService = new AdminService();
+        TrainerService trainerService = new TrainerService();
         while (true) {
             System.out.println("\n---- Welcome to the Fitness Center System----");
             System.out.println("1. Member Login");
             System.out.println("2. Administrative Staff Login");
             System.out.println("3. Register New Member");
+            System.out.println("4. Trainer Login");
             System.out.println("0. Exit");
             System.out.print("Choose an option: ");
 
@@ -24,6 +26,7 @@ public class Main {
                 case 1: memberLogin(scanner, memberService);break;
                 case 2: adminLogin(scanner, adminService);break;
                 case 3: registerMemberMenu(scanner, memberService);break;
+                //case 4: trainerLogin(scanner, trainerService);break;
                 case 0: {
                     System.out.println("Exiting system...");
                     return;
@@ -106,6 +109,52 @@ public class Main {
             }
         }
     }
+
+    private static void trainerLogin(Scanner scanner, TrainerService trainerService){
+        System.out.println("Enter your email: ");
+        String email = scanner.nextLine();
+
+        Trainer trainer =  trainerService.findTrainerByEmail(email);
+        if(trainer == null){
+            System.out.println("No trainer found with that email");
+            return;
+        }
+        trainerMenu(scanner, trainerService, trainer);
+    }
+
+    private static void trainerMenu(Scanner scanner, TrainerService trainerService, Trainer trainer){
+        while (true) {
+            System.out.println("\n-- TRAINER MENU --");
+            System.out.println("1. Availability");
+            System.out.println("2. View Upcoming Sessions");
+            System.out.println("3. View Member Profiles");
+            System.out.println("0. Return to Main Menu");
+            System.out.println("Choose an option: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1: availability(scanner, trainerService, trainer);break;
+                case 2: //upcomingSessions(scanner, trainerService, trainer);break;
+                case 3: //viewProfiles(scanner, trainerService, trainer);break;
+                case 0:
+                    System.out.println("Returning to Main Menu");
+                    return;
+
+                default:
+                    System.out.println("Invalid choice");
+            }
+        }
+    }
+
+    public static void availability(Scanner scanner, TrainerService trainerService, Trainer trainer) {
+        System.out.println(" \n  --- AVAILABILITY --- ");
+
+
+
+    }
+
 
     private static void roomBooking(Scanner scanner) {
         System.out.println("\n--- ROOM BOOKING (admin feature placeholder) ---");

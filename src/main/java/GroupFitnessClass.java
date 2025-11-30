@@ -19,11 +19,10 @@ public class GroupFitnessClass {
     @Column(nullable = false)
     private int capacity;
 
-//THIS WILL BE UNCOMMENTED WHEN IMPLEMENTED
-//    @ManyToOne
-//    @JoinColumn(name="trainer_id", nullable=false)
-//    private Trainer trainer;
-//
+    @ManyToOne
+    @JoinColumn(name="trainer_id", nullable=false)
+    private Trainer trainer;
+
     @ManyToOne
     @JoinColumn(name="room_id", nullable=false)
     private Room room;
@@ -69,14 +68,14 @@ public class GroupFitnessClass {
         this.classTime = classTime;
     }
 
-//    public Trainer getTrainer() {
-//        return trainer;
-//    }
-//
-//    public void setTrainer(Trainer trainer) {
-//        this.trainer = trainer;
-//    }
-//
+    public Trainer getTrainer() {
+        return trainer;
+    }
+
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
+    }
+
     public Room getRoom() {
         return room;
     }
