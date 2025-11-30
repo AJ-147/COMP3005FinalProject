@@ -1,7 +1,10 @@
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
+import java.time.DayOfWeek;
 
 public class Main {
     public static void main(String[] args) {
@@ -26,7 +29,7 @@ public class Main {
                 case 1: memberLogin(scanner, memberService);break;
                 case 2: adminLogin(scanner, adminService);break;
                 case 3: registerMemberMenu(scanner, memberService);break;
-                //case 4: trainerLogin(scanner, trainerService);break;
+                case 4: trainerLogin(scanner, trainerService);break;
                 case 0: {
                     System.out.println("Exiting system...");
                     return;
@@ -146,13 +149,6 @@ public class Main {
                     System.out.println("Invalid choice");
             }
         }
-    }
-
-    public static void availability(Scanner scanner, TrainerService trainerService, Trainer trainer) {
-        System.out.println(" \n  --- AVAILABILITY --- ");
-
-
-
     }
 
 
@@ -292,6 +288,137 @@ public class Main {
             System.out.println("Registration failed. Class may be full or unavailable.");
         }
     }
+
+    public static void availability(Scanner scanner, TrainerService trainerService, Trainer trainer) {
+        System.out.println(" \n  --- AVAILABILITY MANAGEMENT--- ");
+
+        System.out.println("1. View Availability");
+        System.out.println("2. Add One-Time Availability");
+        System.out.println("3. Add Recurring Availability");
+        System.out.println("4. Remove Availability");
+        System.out.println("0. Return to Trainer Menu");
+        System.out.println("Choose an option: ");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:  //view current trainer availability
+                List<TrainerAvailability> slots = trainerService.getAvailability(trainer);
+                if(slots.isEmpty()){
+                    System.out.println("No availability found.");
+                } else {
+                    System.out.println("Your availability slots: ");
+                    for(int i = 0; i < slots.size(); i++){
+                        TrainerAvailability slot = slots.get(i);
+
+                        if (slot.isRecurring()) {
+                            System.out.printf(
+                                    "%d. RECURRING — %s: %s to %s%n",
+                                    i + 1,
+                                    slot.getDayOfWeek(),
+                                    slot.getStartTime(),
+                                    slot.getEndTime()
+                            );
+                        } else {
+                            System.out.printf(
+                                    "%d. ONE-TIME — %s to %s%n",
+                                    i + 1,
+                                    slot.getStartDateTime(),
+                                    slot.getEndDateTime()
+                            );
+                        }
+                    }
+                }
+                break;
+
+            case 2: //add one-time availability
+                System.out.print("Enter start datetime (yyyy-MM-dd): ");
+                LocalDateTime start = LocalDateTime.parse(scanner.nextLine());
+
+                System.out.print("Enter end datetime (yyyy-MM-dd): ");
+                LocalDateTime end = LocalDateTime.parse(scanner.nextLine());
+
+                boolean addedOneTime = trainerService.addOneTimeAvailability(trainer, start, end);
+
+                if (addedOneTime)
+                    System.out.println("One-time slot successfully added.");
+                else
+                    System.out.println("ERROR: Slot overlaps with existing availability.");
+
+                break;
+
+            case 3: //reoccurring avail
+                System.out.print("Enter day of week (MONDAY, TUESDAY, etc): ");
+                DayOfWeek day = DayOfWeek.valueOf(scanner.nextLine().toUpperCase());
+
+                System.out.print("Start time (HH:mm): ");
+                LocalTime rStart = LocalTime.parse(scanner.nextLine());
+
+                System.out.print("End time (HH:mm): ");
+                LocalTime rEnd = LocalTime.parse(scanner.nextLine());
+
+                boolean addedRecurring =
+                        trainerService.addRecurringAvailability(trainer, day, rStart, rEnd);
+
+                if (addedRecurring)
+                    System.out.println("Recurring availability added.");
+                else
+                    System.out.println("ERROR: Overlaps existing availability.");
+
+                break;
+
+            case 4:  //remove availability
+                List<TrainerAvailability> currentSlots = trainerService.getAvailability(trainer);
+
+                if(currentSlots.isEmpty()){
+                    System.out.println("No availability found.");
+                    break;
+                }
+
+                System.out.println("\n Select slot to remove");
+                for(int i = 0; i < currentSlots.size(); i++){
+                    TrainerAvailability slot = currentSlots.get(i);
+
+                    if (slot.isRecurring()) {
+                        System.out.printf(
+                                "%d. RECURRING — %s: %s to %s%n",
+                                i + 1,
+                                slot.getDayOfWeek(),
+                                slot.getStartTime(),
+                                slot.getEndTime()
+                        );
+                    } else {
+                        System.out.printf(
+                                "%d. ONE-TIME — %s to %s%n",
+                                i + 1,
+                                slot.getStartDateTime(),
+                                slot.getEndDateTime()
+                        );
+                    }
+                }
+
+                System.out.print("Enter number to remove: ");
+                int index = scanner.nextInt() - 1;
+                scanner.nextLine();
+
+                if (index < 0 || index >= currentSlots.size()) {
+                    System.out.println("Invalid selection.");
+                    break;
+                }
+
+                trainerService.removeAvailability(trainer, currentSlots.get(index));
+                System.out.println("Availability slot removed.");
+                break;
+
+            case 0:
+                return;
+
+            default:
+                System.out.println("Invalid choice");
+        }
+    }
+
 
 
 

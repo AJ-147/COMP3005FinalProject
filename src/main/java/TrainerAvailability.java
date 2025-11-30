@@ -1,5 +1,10 @@
 import jakarta.persistence.*;
+
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "trainer_availability")
@@ -14,29 +19,50 @@ public class TrainerAvailability {
     @JoinColumn(name = "trainer_id", nullable = false)
     private Trainer trainer;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
+    //one-time availability
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
 
-    @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
+    //recurring availability
+    private boolean recurring;
+    private DayOfWeek dayOfWeek;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
     public TrainerAvailability() {}
 
-    public TrainerAvailability(Trainer trainer, LocalDateTime startTime, LocalDateTime endTime) {
+    //one-time
+    public TrainerAvailability(Trainer trainer, LocalDateTime start, LocalDateTime end) {
         this.trainer = trainer;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.startDateTime = start;
+        this.endDateTime = end;
+        this.recurring = false;
     }
+
+    //recurring
+    public TrainerAvailability(Trainer trainer, DayOfWeek day,LocalTime start, LocalTime end) {
+        this.trainer = trainer;
+        this.dayOfWeek = day;
+        this.startTime = start;
+        this.endTime = end;
+        this.recurring = true;
+    }
+
+    public boolean isRecurring() {return recurring;}
 
     public Long getId() { return id; }
 
     public Trainer getTrainer() { return trainer; }
     public void setTrainer(Trainer trainer) { this.trainer = trainer; }
 
-    public LocalDateTime getStartTime() { return startTime; }
-    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+    //one-time
+    public LocalDateTime getStartDateTime() { return startDateTime; }
+    public LocalDateTime getEndDateTime() { return endDateTime; }
 
-    public LocalDateTime getEndTime() { return endTime; }
-    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
-}
+    //recurring
+    public DayOfWeek getDayOfWeek() { return dayOfWeek; }
+    public LocalTime getStartTime() { return startTime; }
+    public LocalTime getEndTime() { return endTime; }
+
+ }
 

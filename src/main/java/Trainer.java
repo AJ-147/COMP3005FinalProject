@@ -18,7 +18,7 @@ public class Trainer {
 
     //trainer availability
     @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TrainerAvailability> availabilitySlots = new ArrayList<>();
+    private List<TrainerAvailability> availability = new ArrayList<>();
 
     //one trainer can teach many classes
     @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -44,7 +44,7 @@ public class Trainer {
     public String getEmail() {return email;}
     public void setEmail(String email) {this.email = email;}
 
-    public List<TrainerAvailability> getAvailabilitySlots() {return availabilitySlots;}
+    public List<TrainerAvailability> getAvailability() {return availability;}
 
     public List<GroupFitnessClass> getGroupFitnessClass() {return groupFitnessClass;}
 
@@ -52,7 +52,7 @@ public class Trainer {
 
     public void addAvailabilitySlot(TrainerAvailability slot) {
         slot.setTrainer(this);
-        availabilitySlots.add(slot);
+        availability.add(slot);
     }
 
     public void addGroupFitnessClass(GroupFitnessClass fitnessClass) {
