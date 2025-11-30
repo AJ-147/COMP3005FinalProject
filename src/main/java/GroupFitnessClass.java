@@ -30,8 +30,10 @@ public class GroupFitnessClass {
     @OneToMany(mappedBy = "groupFitnessClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClassRegistration> registrations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GroupFitnessClass> classes = new ArrayList<>();
+    //@OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    //private List<GroupFitnessClass> groupFitnessClasses = new ArrayList<>();
+
+
 
     public GroupFitnessClass() {}
 

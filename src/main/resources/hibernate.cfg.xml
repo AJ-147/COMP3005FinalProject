@@ -10,8 +10,8 @@
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
         <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/FinalProject</property>
         <property name="hibernate.connection.username">postgres</property>
-        <property name="hibernate.connection.password">test</property>   <!-- zack password  -->
-        <!-- <property name="hibernate.connection.password">7w4x2u7C</property>   <!- alex password  -->
+        <!-- <property name="hibernate.connection.password">test</property>   <!- zack password  -->
+        <property name="hibernate.connection.password">7w4x2u7C</property>   <!-- alex password  -->
 
         <!-- Hibernate Settings -->
         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
