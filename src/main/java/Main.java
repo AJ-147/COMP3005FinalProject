@@ -2,6 +2,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.util.List;
 import java.time.DayOfWeek;
@@ -144,7 +145,7 @@ public class Main {
 
             switch (choice) {
                 case 1: availability(scanner, trainerService, trainer);break;
-                case 2: //upcomingSessions(scanner, trainerService, trainer);break;
+                case 2: upcomingSessions(scanner, trainerService, trainer);break;
                 case 3: //viewProfiles(scanner, trainerService, trainer);break;
                 case 0:
                     System.out.println("Returning to Main Menu");
@@ -394,11 +395,13 @@ public class Main {
                 break;
 
             case 2: //add one-time availability
-                System.out.print("Enter start datetime (yyyy-MM-dd): ");
-                LocalDateTime start = LocalDateTime.parse(scanner.nextLine());
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-                System.out.print("Enter end datetime (yyyy-MM-dd): ");
-                LocalDateTime end = LocalDateTime.parse(scanner.nextLine());
+                System.out.print("Enter start datetime (yyyy-MM-dd HH:mm): ");
+                LocalDateTime start = LocalDateTime.parse(scanner.nextLine(), dtf);
+
+                System.out.print("Enter end datetime (yyyy-MM-dd HH:mm): ");
+                LocalDateTime end = LocalDateTime.parse(scanner.nextLine(), dtf);
 
                 boolean addedOneTime = trainerService.addOneTimeAvailability(trainer, start, end);
 
@@ -479,6 +482,47 @@ public class Main {
                 System.out.println("Invalid choice");
         }
     }
+
+    private static void upcomingSessions(Scanner scanner, TrainerService trainerService, Trainer trainer){
+        System.out.print("\n--- UPCOMING SESSIONS --- ");
+
+        List<PersonalTrainingSession> ptSessions = trainerService.getUpcomingPtSessions(trainer);
+        List<GroupFitnessClass> classes = trainerService.getUpcomingClasses(trainer);
+
+        //pt sessions
+        System.out.println("\n Personal Training Sessions:");
+        if(ptSessions.isEmpty()){
+            System.out.println("None Scheduled.");
+        } else {
+            for(PersonalTrainingSession ptSession : ptSessions){
+                System.out.printf("  %s   |  Member: %s  |  Room: %s\n",
+                        ptSession.getSessionTime(),
+                        ptSession.getMember(),
+                        ptSession.getRoom());
+            }
+        }
+
+        //group classes
+        System.out.println("\n Group Classes:");
+        if(classes.isEmpty()){
+            System.out.println("None Scheduled.");
+        } else {
+            for(GroupFitnessClass c : classes){
+                System.out.printf("  %s   |  Class: %s  |  Capacity: %s  |  Room: %s\n",
+                        c.getClassTime(),
+                        c.getClassName(),
+                        c.getCapacity(),
+                        c.getRoom());
+            }
+        }
+    }
+
+    //private static void viewProfiles(Scanner scanner, TrainerService trainerService, Trainer trainer){}
+
+
+
+
+
 
     private static void RoomBooking(Scanner scanner, RoomBookingService roomBookingService){
         System.out.println("\n--- ROOM BOOKING ---");

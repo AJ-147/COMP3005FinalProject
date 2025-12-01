@@ -19,15 +19,26 @@ public class TrainerAvailability {
     @JoinColumn(name = "trainer_id", nullable = false)
     private Trainer trainer;
 
-    //one-time availability
+    //recurring
+    @Column(name = "start_time_recurr", nullable = true)
+    private LocalTime startTime;
+
+    @Column(name = "end_time_recurr", nullable = true)
+    private LocalTime endTime;
+
+    @Column(name = "day_of_week",nullable = true)
+    private DayOfWeek dayOfWeek;
+
+    //one time
+    @Column(name = "start_time_one", nullable = true)
     private LocalDateTime startDateTime;
+
+    @Column(name = "end_time_one", nullable = true)
     private LocalDateTime endDateTime;
 
-    //recurring availability
+    //type
+    @Column(nullable = false)
     private boolean recurring;
-    private DayOfWeek dayOfWeek;
-    private LocalTime startTime;
-    private LocalTime endTime;
 
     public TrainerAvailability() {}
 
@@ -37,6 +48,11 @@ public class TrainerAvailability {
         this.startDateTime = start;
         this.endDateTime = end;
         this.recurring = false;
+
+        //set dummy values for recurring columns
+        this.startTime = null;
+        this.endTime = null;
+        this.dayOfWeek = null;
     }
 
     //recurring
@@ -46,14 +62,16 @@ public class TrainerAvailability {
         this.startTime = start;
         this.endTime = end;
         this.recurring = true;
+
+        //dummys
+        this.startDateTime = null;
+        this.endDateTime = null;
     }
 
-    public boolean isRecurring() {return recurring;}
-
     public Long getId() { return id; }
-
     public Trainer getTrainer() { return trainer; }
     public void setTrainer(Trainer trainer) { this.trainer = trainer; }
+    public boolean isRecurring() {return recurring;}
 
     //one-time
     public LocalDateTime getStartDateTime() { return startDateTime; }

@@ -37,63 +37,79 @@ public class TrainerService {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
-        //TrainerAvailability a = new TrainerAvailability(t, start, end);
+            try {
+                //for overlap
+                for (TrainerAvailability a : t.getAvailability()) {
 
-            //for overlap
-            for (TrainerAvailability a : t.getAvailability()) {
-
-                if (!a.isRecurring()) {
-                    // Existing one-time slot
-                    if (!(end.isBefore(a.getStartDateTime()) ||
-                            start.isAfter(a.getEndDateTime()))) {
-                        return false; // Overlaps
-                    }
-                } else {
-                    // Compare one-time slot against recurring: only if day matches
-                    if (start.getDayOfWeek() == a.getDayOfWeek()) {
-                        LocalTime st = start.toLocalTime();
-                        LocalTime en = end.toLocalTime();
-                        if (!(en.isBefore(a.getStartTime()) || st.isAfter(a.getEndTime()))) {
-                            return false;
+                    if (!a.isRecurring()) {
+                        // Existing one-time slot
+                        if (!(end.isBefore(a.getStartDateTime()) ||
+                                start.isAfter(a.getEndDateTime()))) {
+                            return false; // Overlaps
+                        }
+                    } else {
+                        // Compare one-time slot against recurring: only if day matches
+                        if (start.getDayOfWeek() == a.getDayOfWeek()) {
+                            LocalTime st = start.toLocalTime();
+                            LocalTime en = end.toLocalTime();
+                            if (!(en.isBefore(a.getStartTime()) || st.isAfter(a.getEndTime()))) {
+                                return false;
+                            }
                         }
                     }
                 }
+
+                TrainerAvailability slot = new TrainerAvailability(t, start, end);
+
+                session.save(slot);
+                tx.commit();
+                return true;
+            } catch (Exception ex) {
+                if (tx!= null) tx.rollback();
+                ex.printStackTrace();
+                return false;
+            } finally {
+                session.close();
             }
-
-            TrainerAvailability slot = new TrainerAvailability(t, start, end);
-            session.save(slot);
-            tx.commit();
-            return true;
     }
-
 
     public boolean addRecurringAvailability(Trainer t, DayOfWeek day, LocalTime start, LocalTime end) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
-        for (TrainerAvailability a : t.getAvailability()) {
-
-            if (a.isRecurring() && a.getDayOfWeek() == day) {
-                if (!(end.isBefore(a.getStartTime()) || start.isAfter(a.getEndTime()))) {
-                    return false; // Overlaps
-                }
-
-            } else if (!a.isRecurring()) {
-                // Compare recurring against one-time: only if day matches
-                if (a.getStartDateTime().getDayOfWeek() == day) {
-                    LocalTime st = a.getStartDateTime().toLocalTime();
-                    LocalTime en = a.getEndDateTime().toLocalTime();
-                    if (!(end.isBefore(st) || start.isAfter(en))) {
-                        return false;
+        try {
+            // Check for overlaps with existing availability
+            for (TrainerAvailability a : t.getAvailability()) {
+                if (a.isRecurring()) {
+                    // Existing recurring slot
+                    if (a.getDayOfWeek() == day) {
+                        if (!(end.isBefore(a.getStartTime()) || start.isAfter(a.getEndTime()))) {
+                            return false; // Overlaps
+                        }
+                    }
+                } else {
+                    // Compare recurring slot against one-time slots on the same day
+                    if (a.getStartDateTime().getDayOfWeek() == day) {
+                        LocalTime st = a.getStartDateTime().toLocalTime();
+                        LocalTime en = a.getEndDateTime().toLocalTime();
+                        if (!(end.isBefore(st) || start.isAfter(en))) {
+                            return false; // Overlaps
+                        }
                     }
                 }
             }
-        }
 
-        TrainerAvailability slot = new TrainerAvailability(t, day, start, end);
-        session.save(slot);
-        tx.commit();
-        return true;
+            TrainerAvailability slot = new TrainerAvailability(t, day, start, end);
+            session.save(slot);
+            tx.commit();
+            return true;
+        } catch (Exception ex) {
+            if (tx!= null) tx.rollback();
+            ex.printStackTrace();
+            return false;
+        } finally {
+            session.close();
+        }
     }
 
     public void removeAvailability(Trainer trainer, TrainerAvailability slot) {
@@ -110,18 +126,24 @@ public class TrainerService {
         }
     }
 
-    public Trainer loadTrainerSchedule(Long trainerId){
-        Session session = HibernateUtil.getSessionFactory().openSession();
-
-        Trainer trainer = session.createQuery(
-                "SELECT t FROM Trainer t LEFT JOIN FETCH t.classRegistrations LEFT JOIN FETCH t.personalTrainingSessions WHERE t.id = :id",
-                        Trainer.class)
-                        .setParameter("id", trainerId)
-                        .uniqueResult();
-
-        session.close();
-        return trainer;
+    public List<PersonalTrainingSession> getUpcomingPtSessions (Trainer trainer){
+        try (Session session = HibernateUtil.getSessionFactory().openSession()){
+            return session.createQuery(
+                    "FROM PersonalTrainingSession P WHERE p.trainer.id = :tid AND p.sessionTime > CURRENT TIMESTAMP ORDER BY p.sessionTime ASC ",
+                            PersonalTrainingSession.class
+            ).setParameter("tid", trainer.getId()).list();
+        }
     }
+
+    public List<GroupFitnessClass> getUpcomingClasses(Trainer trainer){
+        try (Session session = HibernateUtil.getSessionFactory().openSession()){
+            return session.createQuery(
+                    "FROM GroupFitnessClass g WHERE g.trainer.id = :tid AND g.classTime > CURRENT TIMESTAMP ORDER BY g.classTime ASC",
+                    GroupFitnessClass.class
+            ).setParameter("tid", trainer.getId()).list();
+        }
+    }
+
 
     public Member lookupMember(String memberName){
         Session session = HibernateUtil.getSessionFactory().openSession();
