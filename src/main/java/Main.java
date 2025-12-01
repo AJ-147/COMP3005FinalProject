@@ -1,6 +1,7 @@
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.List;
 import java.time.DayOfWeek;
@@ -26,7 +27,7 @@ public class Main {
             scanner.nextLine();
 
             switch (choice) {
-                case 1: memberLogin(scanner, memberService);break;
+                case 1: memberLogin(scanner, memberService,adminService, roomBookingService,trainerService);break;
                 case 2: adminLogin(scanner, adminService, roomBookingService,trainerService);break;
                 case 3: registerMemberMenu(scanner, memberService);break;
                 case 4: trainerLogin(scanner, trainerService);break;
@@ -39,7 +40,7 @@ public class Main {
 
     }
 
-    private static void memberLogin(Scanner scanner, MemberService memberService) {
+    private static void memberLogin(Scanner scanner, MemberService memberService,AdminService adminService, RoomBookingService roomBookingService, TrainerService trainerService) {
         System.out.print("Enter your email: ");
         String email = scanner.nextLine();
 
@@ -49,15 +50,16 @@ public class Main {
             return;
         }
 
-        memberMenu(scanner, memberService, member);
+        memberMenu(scanner, memberService, member, adminService, roomBookingService, trainerService);
     }
 
-    private static void memberMenu(Scanner scanner,MemberService memberService, Member member) {
+    private static void memberMenu(Scanner scanner,MemberService memberService, Member member, AdminService adminService, RoomBookingService roomBookingService, TrainerService trainerService) {
         while (true) {
             System.out.println("\n===== MEMBER MENU =====");
             System.out.println("1. Profile Management");
             System.out.println("2. Register for Group Class");
-            System.out.println("3. View Dashboard");
+            System.out.println("3. Register for Personal Training Session");
+            System.out.println("4. View Dashboard");
             System.out.println("0. Logout");
             System.out.print("Choose an option: ");
 
@@ -67,8 +69,8 @@ public class Main {
             switch (choice) {
                 case 1: profileManagementMenu(scanner,memberService, member);break;
                 case 2: registerForGroupClass(scanner,memberService, member);break;
-                case 3://viewDashboard(member);
-                    break;
+                case 3: createPTSession(scanner,memberService, adminService,trainerService,roomBookingService);break;
+                case 4: viewDashboard(memberService, member);break;
                 case 0:
                     System.out.println("Logged out.");
                     return;
@@ -94,9 +96,8 @@ public class Main {
     private static void adminMenu(Scanner scanner,RoomBookingService roomBookingService, AdminService adminService, TrainerService trainerService) {
         while (true) {
             System.out.println("\n-- ADMIN MENU --");
-            System.out.println("1.Room Booking");
-            System.out.println("2.Create Group Fitness Class");
-            System.out.println("3. Create Personal Training Session");
+            System.out.println("1. Room Booking");
+            System.out.println("2. Create Group Fitness Class");
             System.out.println("0. Return to Main Menu");
             System.out.println("Choose an option: ");
 
@@ -107,8 +108,6 @@ public class Main {
                     RoomBooking(scanner,roomBookingService);break;
                 case 2:
                     createGroupFitnessClass(scanner, adminService, trainerService,roomBookingService);break;
-                case 3:
-                    createPTSession(scanner,adminService,trainerService,roomBookingService);break;
                 case 0:
                     System.out.println("Returning to Main Menu");
                     return;
@@ -155,12 +154,6 @@ public class Main {
                     System.out.println("Invalid choice");
             }
         }
-    }
-
-
-    private static void roomBooking(Scanner scanner) {
-        System.out.println("\n--- ROOM BOOKING (admin feature placeholder) ---");
-        System.out.println("This feature will assign rooms & prevent double-booking.");
     }
 
 
@@ -272,19 +265,81 @@ public class Main {
         }
     }
 
-    public static void dashboardMenu(Scanner scanner, MemberService memberService) {
-        System.out.print("Enter Member ID: ");
-        int memberId = scanner.nextInt();
-        scanner.nextLine();
+    public static void viewDashboard(MemberService memberService, Member member){
+        System.out.println("\n--- MEMBER DASHBOARD ---");
 
-        //memberService.showDashboard(memberId);
+        Member loadedMember = memberService.loadMemberForDashboard(member.getId());
+        if(loadedMember.getHealthMetrics().isEmpty()) {
+            System.out.println("No health metrics recorded yet.");
+        }else{
+            HealthMetric latest = loadedMember.getHealthMetrics()
+                    .stream()
+                    .max((a,b) -> a.getRecordedAt().compareTo(b.getRecordedAt()))
+                    .get();
+
+            System.out.println("\nLatest Health Metric:");
+            System.out.println("Date: " + latest.getRecordedAt());
+            System.out.println("Height: " + latest.getHeight());
+            System.out.println("Weight: " + latest.getWeight());
+            System.out.println("Heart Rate: " + latest.getHeartRate());
+        }
+
+        if(loadedMember.getFitnessGoals().isEmpty()) {
+            System.out.println("No fitness goals recorded yet.");
+        }else{
+            System.out.println("Fitness Goals:");
+            for (FitnessGoal goal : loadedMember.getFitnessGoals()) {
+                System.out.println("- " + goal.getGoalType() + " | Target: " + goal.getTargetValue());
+            }
+        }
+
+        long pastClassCount = loadedMember.getClassRegistrations()
+                .stream()
+                .filter(reg-> reg.getGroupClass().getClassTime().isBefore(LocalDateTime.now()))
+                .count();
+        System.out.println("\nPast Class Count: " + pastClassCount);
+
+        List<PersonalTrainingSession> upcomingSessions = loadedMember.getPersonalTrainingSessions()
+                .stream()
+                .filter(pts-> pts.getSessionTime().isAfter(LocalDateTime.now()))
+                .toList();
+
+        if(upcomingSessions.isEmpty()) {
+            System.out.println("\nNo upcoming training sessions recorded yet.");
+        }else{
+            System.out.println("\nUpcoming Training Sessions:");
+            for(PersonalTrainingSession pts : upcomingSessions) {
+                System.out.println("- " + pts.getSessionTime() + " with " + pts.getTrainer().getName());
+            }
+        }
     }
 
     public static void registerForGroupClass(Scanner scanner, MemberService memberService, Member member) {
         System.out.println("\n--- REGISTER FOR GROUP FITNESS CLASS ---");
 
-        System.out.print("Enter Class ID to register for: ");
+        List<GroupFitnessClass> groupFitnessClasses = memberService.getAllGroupClasses();
+
+        if(groupFitnessClasses.isEmpty()) {
+            System.out.println("No group fitness classes currently available. ");
+            return;
+        }
+        for(GroupFitnessClass c : groupFitnessClasses) {
+            System.out.println(
+                    "ID: " + c.getId() +
+                            " | Class: " + c.getClassName() +
+                            " | Time: " + c.getClassTime() +
+                            " | Room: " + c.getRoom().getRoomNumber() +
+                            " | Capacity: " + c.getRegistrations().size() + "/" + c.getCapacity()
+            );
+        }
+
+        System.out.print("Enter Class ID to register for a class (or press 0 to cancel): ");
         int classId = Integer.parseInt(scanner.nextLine());
+
+        if (classId == 0) {
+            System.out.println("Registration cancelled.");
+            return;
+        }
 
         boolean success = memberService.registerForClass(member.getEmail(), classId);
 
@@ -535,7 +590,7 @@ public class Main {
 
     }
 
-    private static void createPTSession(Scanner scanner, AdminService adminService,TrainerService trainerService,RoomBookingService roomBookingService){
+    private static void createPTSession(Scanner scanner,MemberService memberService, AdminService adminService,TrainerService trainerService,RoomBookingService roomBookingService){
         System.out.println("\n--- CREATE PERSONAL TRAINING SESSION ---");
 
         System.out.print("Member email: ");
@@ -550,7 +605,7 @@ public class Main {
         System.out.print("Date & time (yyyy-MM-ddTHH:mm): ");
         LocalDateTime time = LocalDateTime.parse(scanner.nextLine());
 
-        boolean success = adminService.createPersonalSession(
+        boolean success = memberService.createPersonalSession(
                 memberEmail, trainerEmail, roomNum, time
         );
 

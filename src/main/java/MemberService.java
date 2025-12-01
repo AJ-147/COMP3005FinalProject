@@ -1,8 +1,10 @@
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import javax.swing.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -103,7 +105,7 @@ public class MemberService {
     }
 
 
-    public Member loadMemberWithHealthHistory(Long memberId) {
+    public Member loadMemberWithHealthHistory(int memberId) {
         Session session = HibernateUtil.getSessionFactory().openSession();
 
         Member member = session.createQuery(
@@ -168,5 +170,70 @@ public class MemberService {
         }
     }
 
+    public boolean createPersonalSession(String memberEmail, String trainerEmail, int roomNumber, LocalDateTime time){
+        Session  session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+
+        Trainer trainer = session.createQuery("FROM Trainer WHERE email = :email", Trainer.class)
+                .setParameter("email", trainerEmail)
+                .uniqueResult();
+
+        Member member = session.createQuery("FROM Member WHERE email = :email", Member.class)
+                .setParameter("email", memberEmail)
+                .uniqueResult();
+
+        Room room = session.createQuery("FROM Room WHERE roomNumber = :num", Room.class)
+                .setParameter("num", roomNumber)
+                .uniqueResult();
+
+        if(trainer==null || room == null||member==null){
+            session.close();
+            return false;
+        }
+
+        if(new RoomBookingService().roomIsBooked(session,room,time)){
+            session.close();
+            return false;
+        }
+
+        PersonalTrainingSession pts = new PersonalTrainingSession(member, trainer, room, time);
+
+        session.persist(pts);
+        session.getTransaction().commit();
+        session.close();
+
+        return true;
+    }
+
+    public Member loadMemberForDashboard(int memberId){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+
+        Member member = session.get(Member.class, memberId);
+
+        Hibernate.initialize(member.getFitnessGoals());
+        Hibernate.initialize(member.getHealthMetrics());
+        Hibernate.initialize(member.getClassRegistrations());
+        Hibernate.initialize(member.getPersonalTrainingSessions());
+        session.close();
+        return member;
+    }
+
+    public List<GroupFitnessClass> getAllGroupClasses(){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+            List<GroupFitnessClass> classes = session
+                    .createQuery("""
+                SELECT DISTINCT g 
+                FROM GroupFitnessClass g
+                LEFT JOIN FETCH g.registrations
+                LEFT JOIN FETCH g.trainer
+                LEFT JOIN FETCH g.room
+            """, GroupFitnessClass.class)
+                    .getResultList();
+
+            session.close();
+            return classes;
+    }
 
 }
