@@ -489,6 +489,8 @@ public class Main {
         List<PersonalTrainingSession> ptSessions = trainerService.getUpcomingPtSessions(trainer);
         List<GroupFitnessClass> classes = trainerService.getUpcomingClasses(trainer);
 
+
+
         //pt sessions
         System.out.println("\n Personal Training Sessions:");
         if(ptSessions.isEmpty()){
@@ -497,8 +499,8 @@ public class Main {
             for(PersonalTrainingSession ptSession : ptSessions){
                 System.out.printf("  %s   |  Member: %s  |  Room: %s\n",
                         ptSession.getSessionTime(),
-                        ptSession.getMember(),
-                        ptSession.getRoom());
+                        ptSession.getMember().getName(),
+                        ptSession.getRoom().getRoomNumber());
             }
         }
 
