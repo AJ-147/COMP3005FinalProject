@@ -41,7 +41,6 @@ public class DataInitializer {
             Trainer t2 = new Trainer("Sarah Adams", "sarah@");
             Trainer t3 = new Trainer("Mike Jones", "mike@");
 
-
             session.persist(t1);
             session.persist(t2);
             session.persist(t3);
