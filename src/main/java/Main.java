@@ -146,7 +146,7 @@ public class Main {
             switch (choice) {
                 case 1: availability(scanner, trainerService, trainer);break;
                 case 2: upcomingSessions(scanner, trainerService, trainer);break;
-                case 3: //viewProfiles(scanner, trainerService, trainer);break;
+                case 3: memberLookup(scanner, trainerService, trainer);break;
                 case 0:
                     System.out.println("Returning to Main Menu");
                     return;
@@ -489,6 +489,8 @@ public class Main {
         List<PersonalTrainingSession> ptSessions = trainerService.getUpcomingPtSessions(trainer);
         List<GroupFitnessClass> classes = trainerService.getUpcomingClasses(trainer);
 
+
+
         //pt sessions
         System.out.println("\n Personal Training Sessions:");
         if(ptSessions.isEmpty()){
@@ -497,8 +499,8 @@ public class Main {
             for(PersonalTrainingSession ptSession : ptSessions){
                 System.out.printf("  %s   |  Member: %s  |  Room: %s\n",
                         ptSession.getSessionTime(),
-                        ptSession.getMember(),
-                        ptSession.getRoom());
+                        ptSession.getMember().getName(),
+                        ptSession.getRoom().getRoomNumber());
             }
         }
 
@@ -517,12 +519,50 @@ public class Main {
         }
     }
 
-    //private static void viewProfiles(Scanner scanner, TrainerService trainerService, Trainer trainer){}
+    private static void memberLookup(Scanner scanner, TrainerService trainerService, Trainer trainer){
+        System.out.println("\n--- MEMBER LOOKUP --- ");
+        System.out.print("Enter member name to search: ");
+        String searchN =  scanner.nextLine().trim();
 
+        List<Member> results = trainerService.searchMembers(trainer, searchN);
+        //System.out.println("made it here");
 
+        if(results.isEmpty()){
+            System.out.println("No members found.");
+        } else {
+            System.out.println("\n --- MEMBERS ---");
+            for (Member m : results){
+                FitnessGoal g = trainerService.getCurrentGoal(m);
+                HealthMetric hm = trainerService.getLastMetric(m);
 
+                System.out.printf("Name: %s%n", m.getName());
 
+                if (g != null) {
+                    System.out.printf("Current Goal: %s — Target: %.2f, Achieved: %s, Created: %s%n",
+                            g.getGoalType(),
+                            g.getTargetValue(),
+                            g.isAchieved() ? "Yes" : "No",
+                            g.getCreatedAt()
+                    );
+                } else {
+                    System.out.println("Current Goal: None");
+                }
 
+                if (hm != null) {
+                    System.out.printf("Last Metric: Height: %.1f cm, Weight: %.1f lbs, Heart Rate: %d bpm, Recorded At: %s%n",
+                            hm.getHeight(),
+                            hm.getWeight(),
+                            hm.getHeartRate(),
+                            hm.getRecordedAt()
+                    );
+                } else {
+                    System.out.println("Last Metric: None");
+                }
+
+                System.out.println("--------------------");
+            }
+        }
+     }
 
     private static void RoomBooking(Scanner scanner, RoomBookingService roomBookingService){
         System.out.println("\n--- ROOM BOOKING ---");
