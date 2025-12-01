@@ -146,21 +146,45 @@ public class TrainerService {
         }
     }
 
+       // Get members that the trainer is training, filtered by name (case-insensitive)
+        List<Member> searchMembers(Trainer trainer, String nameQuery) {
+            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                String hql = "SELECT DISTINCT m FROM Member m " +
+                        "JOIN m.personalTrainingSessions pts " +
+                        "WHERE pts.trainer = :trainer " +
+                        "AND LOWER(m.name) LIKE :nameQuery";
 
-    public Member lookupMember(String memberName){
-        Session session = HibernateUtil.getSessionFactory().openSession();
+                Query<Member> query = session.createQuery(hql, Member.class);
+                query.setParameter("trainer", trainer);
+                query.setParameter("nameQuery", "%" + nameQuery.toLowerCase() + "%");
 
-        //fetch member and last health metric
-        Member member = session.createQuery(
-                "SELECT m FROM Member m LEFT JOIN FETCH m.healthMetrics hm LEFT JOIN FETCH m.fitnessGoals fg WHERE LOWER(m.name) LIKE LOWER(:name)",
-                Member.class)
-                .setParameter("name", "%" + memberName + "%")
-                .setMaxResults(1)
-                .uniqueResult();
+                return query.list();
+            }
+        }
 
-        session.close();
-        return member;
-    }
+        //helper last metric
+        public HealthMetric getLastMetric(Member member) {
+            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                return session.createQuery(
+                                "FROM HealthMetric hm WHERE hm.member = :member ORDER BY hm.recordedAt DESC",
+                                HealthMetric.class
+                        ).setParameter("member", member)
+                        .setMaxResults(1)
+                        .uniqueResult();
+            }
+        }
+
+        //get current goal
+        public FitnessGoal getCurrentGoal(Member member) {
+            try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                return session.createQuery(
+                                "FROM FitnessGoal g WHERE g.member = :member ORDER BY g.createdAt DESC",
+                                FitnessGoal.class
+                        ).setParameter("member", member)
+                        .setMaxResults(1)
+                        .uniqueResult();
+            }
+        }
 
 
 
