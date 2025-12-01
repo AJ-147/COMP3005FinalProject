@@ -237,7 +237,7 @@ public class Main {
         System.out.print("Weight: ");
         double weight = scanner.nextDouble();
 
-        System.out.print("Heart Rate: ");
+        System.out.print("Average Heart Rate during workout: ");
         int heartRate = scanner.nextInt();
         scanner.nextLine();
 
@@ -260,7 +260,7 @@ public class Main {
                     "Date: " + healthMetric.getRecordedAt() +
                             " | Height: " + healthMetric.getHeight() +
                             " | Weight: " + healthMetric.getWeight() +
-                            " | Heart Rate: " + healthMetric.getHeartRate()
+                            " | Average Heart Rate During Workout: " + healthMetric.getHeartRate()
             );
 
         }
@@ -282,7 +282,7 @@ public class Main {
             System.out.println("Date: " + latest.getRecordedAt());
             System.out.println("Height: " + latest.getHeight());
             System.out.println("Weight: " + latest.getWeight());
-            System.out.println("Heart Rate: " + latest.getHeartRate());
+            System.out.println("Average Heart Rate during Workout: " + latest.getHeartRate());
         }
 
         if(loadedMember.getFitnessGoals().isEmpty()) {
@@ -566,6 +566,7 @@ public class Main {
 
                 boolean success = roomBookingService.assignRoomToClass(classId, roomId);
                 System.out.println(success ? "Room booked successfully!" : "Room already booked at that time.");
+                break;
             }
             case 2:{
                 List<PersonalTrainingSession> sessions = roomBookingService.getAllPersonalTrainingSessions();
@@ -598,6 +599,7 @@ public class Main {
 
                 boolean success = roomBookingService.assignRoomToClass(sessionId, roomId);
                 System.out.println(success ? "Room booked successfully!" : "Room already booked at that time.");
+                break;
             }
 
         }
