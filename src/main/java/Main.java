@@ -471,7 +471,7 @@ public class Main {
                     break;
                 }
 
-                trainerService.removeAvailability(trainer, currentSlots.get(index));
+                trainerService.removeAvailability(currentSlots.get(index));
                 System.out.println("Availability slot removed.");
                 break;
 

@@ -112,16 +112,18 @@ public class TrainerService {
         }
     }
 
-    public void removeAvailability(Trainer trainer, TrainerAvailability slot) {
+    public void removeAvailability(TrainerAvailability slot) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();
 
-            TrainerAvailability toDelete = session.get(TrainerAvailability.class, slot.getId());
-
-            if (toDelete != null) {
-                session.remove(toDelete);
+            TrainerAvailability managedslot = session.get(TrainerAvailability.class, slot.getId());
+            if (managedslot != null) {
+                Trainer trainer = managedslot.getTrainer();
+                if(trainer!= null &&  trainer.getAvailability() != null) {
+                    trainer.getAvailability().remove(managedslot); //remove from collection
+                }
+                session.remove(managedslot);
             }
-
             tx.commit();
         }
     }
@@ -129,7 +131,7 @@ public class TrainerService {
     public List<PersonalTrainingSession> getUpcomingPtSessions (Trainer trainer){
         try (Session session = HibernateUtil.getSessionFactory().openSession()){
             return session.createQuery(
-                    "FROM PersonalTrainingSession P WHERE p.trainer.id = :tid AND p.sessionTime > CURRENT TIMESTAMP ORDER BY p.sessionTime ASC ",
+                    "FROM PersonalTrainingSession p WHERE p.trainer.id = :tid AND p.sessionTime > CURRENT_TIMESTAMP ORDER BY p.sessionTime ASC ",
                             PersonalTrainingSession.class
             ).setParameter("tid", trainer.getId()).list();
         }
