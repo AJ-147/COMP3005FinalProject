@@ -489,8 +489,6 @@ public class Main {
         List<PersonalTrainingSession> ptSessions = trainerService.getUpcomingPtSessions(trainer);
         List<GroupFitnessClass> classes = trainerService.getUpcomingClasses(trainer);
 
-
-
         //pt sessions
         System.out.println("\n Personal Training Sessions:");
         if(ptSessions.isEmpty()){
@@ -514,7 +512,7 @@ public class Main {
                         c.getClassTime(),
                         c.getClassName(),
                         c.getCapacity(),
-                        c.getRoom());
+                        c.getRoom().getRoomNumber());
             }
         }
     }
