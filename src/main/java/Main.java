@@ -3,7 +3,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Scanner;
 import java.util.List;
-import java.util.ArrayList;
 import java.time.DayOfWeek;
 
 public class Main {
@@ -13,6 +12,7 @@ public class Main {
         MemberService memberService = new MemberService();
         AdminService adminService = new AdminService();
         TrainerService trainerService = new TrainerService();
+        RoomBookingService roomBookingService = new RoomBookingService();
         while (true) {
             System.out.println("\n---- Welcome to the Fitness Center System----");
             System.out.println("1. Member Login");
@@ -27,7 +27,7 @@ public class Main {
 
             switch (choice) {
                 case 1: memberLogin(scanner, memberService);break;
-                case 2: adminLogin(scanner, adminService);break;
+                case 2: adminLogin(scanner, adminService, roomBookingService,trainerService);break;
                 case 3: registerMemberMenu(scanner, memberService);break;
                 case 4: trainerLogin(scanner, trainerService);break;
                 case 0: {
@@ -79,7 +79,7 @@ public class Main {
     }
 
 
-    private static void adminLogin(Scanner scanner, AdminService adminService){
+    private static void adminLogin(Scanner scanner, AdminService adminService,RoomBookingService roomBookingService,TrainerService trainerService) {
         System.out.println("Enter your email: ");
         String email = scanner.nextLine();
 
@@ -88,13 +88,15 @@ public class Main {
             return;
         }
 
-        adminMenu(scanner);
+        adminMenu(scanner,roomBookingService,adminService,trainerService);
     }
 
-    private static void adminMenu(Scanner scanner){
+    private static void adminMenu(Scanner scanner,RoomBookingService roomBookingService, AdminService adminService, TrainerService trainerService) {
         while (true) {
             System.out.println("\n-- ADMIN MENU --");
             System.out.println("1.Room Booking");
+            System.out.println("2.Create Group Fitness Class");
+            System.out.println("3. Create Personal Training Session");
             System.out.println("0. Return to Main Menu");
             System.out.println("Choose an option: ");
 
@@ -102,7 +104,11 @@ public class Main {
             scanner.nextLine();
             switch (choice) {
                 case 1:
-                    roomBooking(scanner);break;
+                    RoomBooking(scanner,roomBookingService);break;
+                case 2:
+                    createGroupFitnessClass(scanner, adminService, trainerService,roomBookingService);break;
+                case 3:
+                    createPTSession(scanner,adminService,trainerService,roomBookingService);break;
                 case 0:
                     System.out.println("Returning to Main Menu");
                     return;
@@ -419,7 +425,141 @@ public class Main {
         }
     }
 
+    private static void RoomBooking(Scanner scanner, RoomBookingService roomBookingService){
+        System.out.println("\n--- ROOM BOOKING ---");
+        System.out.println("1. Assign room to Group Fitness Class");
+        System.out.println("2. Assign room to Personal Training Session");
+        System.out.println("0. Back");
+        System.out.print("Choose an option: ");
 
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:{
+                List<GroupFitnessClass> classes = roomBookingService.getAllGroupFitnessClasses();
+                if(classes.isEmpty()){
+                    System.out.println("No classes exist.");
+                    return;
+                }
+                System.out.println("\nGROUP FITNESS CLASSES:");
+                for (GroupFitnessClass c : classes) {
+                    System.out.println("Class ID: " + c.getId() + " | " + c.getClassName() +
+                            " | "  + c.getClassTime() +
+                            " | Room: " + (c.getRoom() == null ? "None" : c.getRoom().getRoomNumber()));
+                }
+
+                System.out.print("Enter class ID to assign room: ");
+                int classId = scanner.nextInt();
+                scanner.nextLine();
+
+                List<Room> rooms = roomBookingService.getAllRooms();
+                System.out.println("\nAVAILABLE ROOMS:");
+                for (Room r : rooms) {
+                    System.out.println("Room ID: " + r.getId() +
+                            " | Room Number: " + r.getRoomNumber() +
+                            " | Capacity: " + r.getCapacity());
+                }
+
+                System.out.print("Enter Room ID to assign: ");
+                int roomId = scanner.nextInt();
+                scanner.nextLine();
+
+                boolean success = roomBookingService.assignRoomToClass(classId, roomId);
+                System.out.println(success ? "Room booked successfully!" : "Room already booked at that time.");
+            }
+            case 2:{
+                List<PersonalTrainingSession> sessions = roomBookingService.getAllPersonalTrainingSessions();
+                if(sessions.isEmpty()){
+                    System.out.println("No Personal Training sessions exist.");
+                    return;
+                }
+            System.out.println("\nPERSONAL TRAINING SESSIONS:");
+                for (PersonalTrainingSession p : sessions) {
+                    System.out.println("Class ID: " + p.getId() + " | " + p.getTrainer() +
+                            " | " + p.getSessionTime() + " " +
+                            " | Room: " + (p.getRoom() == null ? "None" : p.getRoom().getRoomNumber()));
+                }
+
+                System.out.print("Enter Personal Training Session ID to assign room: ");
+                int sessionId = scanner.nextInt();
+                scanner.nextLine();
+
+                List<Room> rooms = roomBookingService.getAllRooms();
+                System.out.println("\nAVAILABLE ROOMS:");
+                for (Room r : rooms) {
+                    System.out.println("Room ID: " + r.getId() +
+                            " | Room Number: " + r.getRoomNumber() +
+                            " | Capacity: " + r.getCapacity());
+                }
+
+                System.out.print("Enter Room ID to assign: ");
+                int roomId = scanner.nextInt();
+                scanner.nextLine();
+
+                boolean success = roomBookingService.assignRoomToClass(sessionId, roomId);
+                System.out.println(success ? "Room booked successfully!" : "Room already booked at that time.");
+            }
+
+        }
+    }
+
+    private static void createGroupFitnessClass(Scanner scanner, AdminService adminService,TrainerService trainerService,RoomBookingService roomBookingService){
+        System.out.println("\n--- CREATE GROUP FITNESS CLASS ---");
+
+        System.out.print("Class name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Capacity: ");
+        int capacity = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Trainer email: ");
+        String trainerEmail = scanner.nextLine();
+
+        System.out.print("Room number: ");
+        int roomNum = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Date & time (yyyy-MM-ddTHH:mm): ");
+        LocalDateTime time = LocalDateTime.parse(scanner.nextLine());
+
+        boolean success = adminService.createGroupClass(
+                name, capacity, trainerEmail, roomNum, time
+        );
+
+        if (success) {
+            System.out.println("Group class created");
+        } else {
+            System.out.println("Failed to create class (room conflict or invalid trainer)");
+        }
+
+
+    }
+
+    private static void createPTSession(Scanner scanner, AdminService adminService,TrainerService trainerService,RoomBookingService roomBookingService){
+        System.out.println("\n--- CREATE PERSONAL TRAINING SESSION ---");
+
+        System.out.print("Member email: ");
+        String memberEmail = scanner.nextLine();
+
+        System.out.print("Trainer email: ");
+        String trainerEmail = scanner.nextLine();
+
+        System.out.print("Room number: ");
+        int roomNum = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Date & time (yyyy-MM-ddTHH:mm): ");
+        LocalDateTime time = LocalDateTime.parse(scanner.nextLine());
+
+        boolean success = adminService.createPersonalSession(
+                memberEmail, trainerEmail, roomNum, time
+        );
+
+        if (success) {
+            System.out.println("Personal Training Session created");
+        } else {
+            System.out.println("Failed to create session");
+        }
+    }
 
 
 }

@@ -22,5 +22,71 @@ public class AdminService {
        return adminStaff!=null;
     }
 
+    public boolean createGroupClass(String className, int capacity, String trainerEmail, int roomNumber, LocalDateTime time){
+        Session  session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+
+        Trainer trainer = session.createQuery("FROM Trainer WHERE email = :email", Trainer.class)
+                .setParameter("email", trainerEmail)
+                .uniqueResult();
+
+        Room room = session.createQuery("FROM Room WHERE roomNumber = :num", Room.class)
+                .setParameter("num", roomNumber)
+                .uniqueResult();
+
+        if(trainer==null || room == null){
+            session.close();
+            return false;
+        }
+
+        if(new RoomBookingService().roomIsBooked(session,room,time)){
+            session.close();
+            return false;
+        }
+
+        GroupFitnessClass gfc = new GroupFitnessClass(className,capacity,trainer,room,time);
+
+        session.persist(gfc);
+        session.getTransaction().commit();
+        session.close();
+
+        return true;
+    }
+
+    public boolean createPersonalSession(String memberEmail, String trainerEmail, int roomNumber, LocalDateTime time){
+        Session  session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+
+        Trainer trainer = session.createQuery("FROM Trainer WHERE email = :email", Trainer.class)
+                .setParameter("email", trainerEmail)
+                .uniqueResult();
+
+        Member member = session.createQuery("FROM Member WHERE email = :email", Member.class)
+                .setParameter("email", memberEmail)
+                .uniqueResult();
+
+        Room room = session.createQuery("FROM Room WHERE roomNumber = :num", Room.class)
+                .setParameter("num", roomNumber)
+                .uniqueResult();
+
+        if(trainer==null || room == null||member==null){
+            session.close();
+            return false;
+        }
+
+        if(new RoomBookingService().roomIsBooked(session,room,time)){
+            session.close();
+            return false;
+        }
+
+        PersonalTrainingSession pts = new PersonalTrainingSession(member, trainer, room, time);
+
+        session.persist(pts);
+        session.getTransaction().commit();
+        session.close();
+
+        return true;
+    }
+
 
 }

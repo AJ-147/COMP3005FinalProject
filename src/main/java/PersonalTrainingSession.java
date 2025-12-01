@@ -28,10 +28,10 @@ public class PersonalTrainingSession {
 
     public PersonalTrainingSession() {}
 
-    public PersonalTrainingSession(LocalDateTime sessionTime, Member member, Room room){//, Trainer trainer) {
+    public PersonalTrainingSession( Member member, Trainer trainer, Room room, LocalDateTime sessionTime) {
         this.sessionTime = sessionTime;
         this.member = member;
-        //this.trainer = trainer;
+        this.trainer = trainer;
         this.room = room;
         this.status= "BOOKED";
     }
@@ -72,13 +72,13 @@ public class PersonalTrainingSession {
         this.trainer = trainer;
     }
 
-//    public Room getRoom() {
-//        return room;
-//    }
-//
-//    public void setRoom(Room room) {
-//        this.room = room;
-//    }
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
 
     @Override
     public String toString() {

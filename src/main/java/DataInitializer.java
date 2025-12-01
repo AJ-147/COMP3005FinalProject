@@ -32,7 +32,21 @@ public class DataInitializer {
             session.persist(r4);
         }
 
-        //create trainers??
+        long trainerCount = (long) session
+                .createQuery("SELECT COUNT(t) FROM Trainer t")
+                .uniqueResult();
+
+        if (trainerCount == 0) {
+            Trainer t1 = new Trainer("John Smith", "john@");
+            Trainer t2 = new Trainer("Sarah Adams", "sarah@");
+            Trainer t3 = new Trainer("Mike Jones", "mike@");
+
+
+            session.persist(t1);
+            session.persist(t2);
+            session.persist(t3);
+        }
+
 
 
 

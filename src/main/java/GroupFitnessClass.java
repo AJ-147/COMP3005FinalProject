@@ -13,6 +13,7 @@ public class GroupFitnessClass {
     @Column(nullable = false)
     private String className;
 
+
     @Column(name="class_time", nullable = false)
     private LocalDateTime classTime;
 
@@ -30,19 +31,19 @@ public class GroupFitnessClass {
     @OneToMany(mappedBy = "groupFitnessClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClassRegistration> registrations = new ArrayList<>();
 
-    //@OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
-    //private List<GroupFitnessClass> groupFitnessClasses = new ArrayList<>();
+//    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<GroupFitnessClass> groupFitnessClasses = new ArrayList<>();
 
 
 
     public GroupFitnessClass() {}
 
-    public GroupFitnessClass(String className, LocalDateTime classTime, int capacity,Room room) {//Trainer trainer
+    public GroupFitnessClass(String className,int capacity, Trainer trainer,Room room,LocalDateTime classTime){
     this.className = className;
     this.classTime = classTime;
     this.capacity = capacity;
     this.room = room;
-        //this.trainer= trainer;
+    this.trainer= trainer;
     }
 
     public Long getId() {

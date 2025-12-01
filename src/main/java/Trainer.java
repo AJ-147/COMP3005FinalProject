@@ -17,7 +17,7 @@ public class Trainer {
     private String email;
 
     //trainer availability
-    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true,fetch=FetchType.EAGER)
     private List<TrainerAvailability> availability = new ArrayList<>();
 
     //one trainer can teach many classes
