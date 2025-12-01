@@ -11,7 +11,6 @@ public class FitnessGoal {
 
     private String goalType;
     private double targetValue;
-    private double currentProgress;
     private LocalDate createdAt;
     private boolean achieved;
 
@@ -27,7 +26,6 @@ public class FitnessGoal {
         this.createdAt = LocalDate.now();
         this.member = member;
         this.achieved = false;
-        this.currentProgress = 0;
     }
 
     public String getGoalType() {
