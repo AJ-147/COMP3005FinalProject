@@ -11,6 +11,7 @@ public class FitnessGoal {
 
     private String goalType;
     private double targetValue;
+
     private LocalDate createdAt;
     private boolean achieved;
 
